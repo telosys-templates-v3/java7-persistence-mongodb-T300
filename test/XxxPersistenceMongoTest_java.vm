@@ -1,0 +1,53 @@
+#parse("include/java_header.vm")
+
+package ${target.javaPackageFromFolder($TEST_SRC)};
+
+import org.demo.persistence.${entity.name}Persistence ;
+import org.demo.persistence.${entity.name}PersistenceGenericTest;
+import org.junit.Test;
+/*
+import org.demo.persistence.impl.mongo.commons.MongoUtil;
+import com.mongodb.client.MongoDatabase;
+import org.demo.persistence.impl.mongo.commons.ClientProvider;
+import org.junit.After;
+import org.junit.BeforeClass;
+import java.util.logging.*;
+*/
+
+/**
+ * JUnit tests for Car persistence service
+ * 
+ * @author Telosys Tools
+ *
+ */
+public class ${entity.name}PersistenceMongoIT extends ${entity.name}PersistenceGenericTest {
+/*
+	private static final Logger LOGGER = Logger.getLogger(${entity.name}PersistenceMongoTest.class.getName());
+
+	@BeforeClass
+	public static void startMongoServer() {
+		try {
+			MongoUtil.init();
+		} catch (Exception e) {
+			LOGGER.info("error start server");
+		}
+	}
+*/
+
+	@Test
+	public void testPersistenceService() throws Exception {
+    	${entity.name}Persistence persistenceService = new ${entity.name}PersistenceMongo();
+    	testPersistenceService(persistenceService);
+	}
+
+/*
+	@After
+	public void after() throws Exception{
+		System.out.println("Fin du test. Suppression de la base " + "mongoPersistence");
+		MongoDatabase db = ClientProvider.getMongoInstance().getDatabase("mongoPersistence");
+		db.drop();
+		LOGGER.info("Base " + "mongoPersistence" + " supprime avec succes");
+	}
+*/
+}
+
