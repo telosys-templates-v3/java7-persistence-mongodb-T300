@@ -34,7 +34,7 @@ public class MongoSequence {
 		super();
 		this.sequenceName = name;
 		this.sequenceKey = "SEQUENCE_" + name;
-		this.counters = ClientProvider.getMongoDatabase().getCollection(COUNTERS);
+		this.counters = MongoManager.getMongoCollection(COUNTERS);
 		Document doc = new Document("sequenceField", sequenceName).append(sequenceKey, 0L);
 		this.counters.insertOne(doc);
 		this.filter = eq("sequenceField", sequenceName);

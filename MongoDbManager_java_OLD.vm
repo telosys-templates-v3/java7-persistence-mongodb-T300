@@ -16,12 +16,12 @@ import com.mongodb.client.MongoDatabase;
  * @author ${AUTHOR}
  *
  */
-public class ClientProvider {
+public class MongoDbManager {
 
 	/**
 	 * The properties file containing the mongo configuration
 	 */
-	private final static String MONGO_PROPERTIES_FILE_NAME = "/mongo.properties";
+	private final static String MONGO_PROPERTIES_FILE_NAME = "/META-INF/mongo.properties";
 	private final static String PORT = "mongo.port";
 	private final static String HOST = "mongo.hostname";
 	private final static String DBNAME = "mongo.dbname";

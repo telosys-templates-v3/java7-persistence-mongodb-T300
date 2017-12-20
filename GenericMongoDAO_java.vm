@@ -21,7 +21,7 @@ import static com.mongodb.client.model.Projections.*;
 public abstract class GenericMongoDAO<T> {
 
 	private String entityName;
-	private MongoCollection<Document> table;
+	private MongoCollection<Document> mongoCollection;
 	private static final String SET = "${DOLLAR}set";
 
 	//-----------------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ public abstract class GenericMongoDAO<T> {
 	 */
 	protected GenericMongoDAO(String entityName) {
 		this.entityName = entityName;
-		this.table = ClientProvider.getMongoDatabase().getCollection(entityName);
+		this.mongoCollection = MongoManager.getMongoCollection(entityName);
 	}
 
 	//-----------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ public abstract class GenericMongoDAO<T> {
 	protected abstract Bson bsonForIdentifyBean(T bean);
 
 	//-----------------------------------------------------------------------------------------
-	// REDIS PERSISTENCE METHODS
+	// PERSISTENCE METHODS
 	//-----------------------------------------------------------------------------------------
 	/**
 	 * Loads the given bean from the database using its primary key 
@@ -76,7 +76,7 @@ public abstract class GenericMongoDAO<T> {
 	 */
 	protected T doSelect(T bean) {
 		Bson filter = bsonForIdentifyBean(bean);
-		Document myDoc = table.find(filter).projection(excludeId()).first();
+		Document myDoc = mongoCollection.find(filter).projection(excludeId()).first();
 		if(myDoc!=null)
 			return docTobean(myDoc);
 		return null;	
@@ -88,7 +88,7 @@ public abstract class GenericMongoDAO<T> {
 	 * @return
 	 */
 	protected List<T> doSelectAll() {
-		MongoCursor<Document> cursor = table.find().iterator();
+		MongoCursor<Document> cursor = mongoCollection.find().iterator();
 			List<T> list = new LinkedList<T>();
 			T bean;
 			while (cursor.hasNext()) {
@@ -109,7 +109,7 @@ public abstract class GenericMongoDAO<T> {
 			setAutoIncrementedKey(bean, sequence.nextVal()) ; 				
 		} while ( doExists(bean) == true );
 		DocumentWrapper myDoc = beanToDoc(bean);
-		table.insertOne(myDoc.getDocument());
+		mongoCollection.insertOne(myDoc.getDocument());
 		return sequence.currVal() ;
 	}
 
@@ -123,12 +123,12 @@ public abstract class GenericMongoDAO<T> {
 	protected void doInsert(T bean) {
 		DocumentWrapper myDoc = beanToDoc(bean);
 		if (myDoc != null) {
-			table.insertOne(myDoc.getDocument());
+			mongoCollection.insertOne(myDoc.getDocument());
 		}
 	}
 
 	/**
-	 * Updates the given bean in the database (Mongo)
+	 * Updates the given bean in the database
 	 * 
 	 * @param bean
 	 * @return the Mongo return code (i.e. the row count affected by the UPDATE
@@ -138,12 +138,12 @@ public abstract class GenericMongoDAO<T> {
 		DocumentWrapper myDoc = beanToDoc(bean);
 		Bson updateQuery = bsonForIdentifyBean(bean);
 		Document doc = new Document(SET, myDoc.getDocument());
-		result = table.updateOne(updateQuery, doc).getModifiedCount();
+		result = mongoCollection.updateOne(updateQuery, doc).getModifiedCount();
 		return result;
 	}
 
 	/**
-	 * Deletes the given bean in the database (Redis)
+	 * Deletes the given bean in the database
 	 * 
 	 * @param bean
 	 * @return the Redis return code (i.e. the row count affected by the DELETE
@@ -151,7 +151,7 @@ public abstract class GenericMongoDAO<T> {
 	 */
 	protected long doDelete(T bean) {
 		Bson filter = bsonForIdentifyBean(bean);
-		long result = table.deleteOne(filter).getDeletedCount();
+		long result = mongoCollection.deleteOne(filter).getDeletedCount();
 		return result;
 	}
 
@@ -163,17 +163,17 @@ public abstract class GenericMongoDAO<T> {
 	 */
 	protected boolean doExists(T bean) {
 		Bson filter = bsonForIdentifyBean(bean);
-		Document existQuery = table.find(filter).first();
+		Document existQuery = mongoCollection.find(filter).first();
 		return (existQuery != null);
 		
 	}
 
 	/**
-	 * Counts all the occurrences in the table
+	 * Counts all the occurrences in the database
 	 * 
 	 * @return
 	 */
 	protected long doCountAll() {
-		return table.count();
+		return mongoCollection.count();
 	}
 }
